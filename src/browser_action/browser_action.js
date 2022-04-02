@@ -27,7 +27,7 @@ f.on("value", function(snapshot) {
 
   //$('.yo').append(html);
   var send = document.getElementById('send');
-  send.addEventListener('click', sendEmail('kyleinkdaniel@gmail.com', 'WordList', html));
+  send.addEventListener('click', sendEmail('ingspi@gmail.com', 'WordList', html));
 });
 
 
