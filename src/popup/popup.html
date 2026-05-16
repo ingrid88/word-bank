@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 320px;
+      max-height: 450px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      color: #222;
+      padding: 12px;
+    }
+    h1 {
+      font-size: 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .count {
+      font-size: 12px;
+      color: #666;
+      font-weight: normal;
+    }
+    .actions {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    button {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #f8f8f8;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    button:hover { background: #e8e8e8; }
+    .word-list {
+      max-height: 340px;
+      overflow-y: auto;
+      border-top: 1px solid #eee;
+      padding-top: 8px;
+    }
+    .word-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 4px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .word-item:hover { background: #f9f9f9; }
+    .word-text {
+      font-weight: 500;
+    }
+    .word-url {
+      font-size: 11px;
+      color: #888;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .word-url a { color: #888; text-decoration: none; }
+    .word-url a:hover { text-decoration: underline; }
+    .delete-btn {
+      flex: none;
+      width: 20px;
+      height: 20px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #aaa;
+      font-size: 14px;
+      padding: 0;
+      line-height: 20px;
+    }
+    .delete-btn:hover { color: #e44; }
+    .email-setting {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .email-setting label {
+      font-size: 12px;
+      white-space: nowrap;
+      color: #555;
+    }
+    .email-setting input {
+      flex: 1;
+      padding: 4px 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .email-setting button {
+      flex: none;
+      padding: 4px 8px;
+    }
+    .empty {
+      text-align: center;
+      color: #999;
+      padding: 40px 0;
+    }
+    .toast {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <h1>WordKeeper <span class="count" id="count"></span></h1>
+  <div class="actions">
+    <button id="copy-btn">Copy All</button>
+    <button id="email-btn">Email to Myself</button>
+    <button id="clear-btn">Clear All</button>
+  </div>
+  <div class="email-setting" id="email-setting">
+    <label for="email-input">Send to:</label>
+    <input type="email" id="email-input" placeholder="your@email.com">
+    <button id="save-email-btn">Save</button>
+  </div>
+  <div class="word-list" id="word-list"></div>
+  <div class="toast" id="toast"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
