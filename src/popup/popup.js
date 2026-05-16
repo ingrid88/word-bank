@@ -58,12 +58,6 @@ function loadWords(callback) {
 
 loadWords((words) => render(words));
 
-chrome.storage.onChanged.addListener((changes) => {
-  if (changes.words) {
-    render(changes.words.newValue || []);
-  }
-});
-
 wordListEl.addEventListener("click", (e) => {
   const btn = e.target.closest(".delete-btn");
   if (!btn) return;
@@ -89,51 +83,25 @@ emailBtn.addEventListener("click", () => {
     loadWords((words) => {
       if (words.length === 0) return showToast("Nothing to email");
       const body = words.map((w) => `${w.word} — ${w.url}`).join("\n");
-      sendViaGmail(to, "My WordKeeper List", body);
+      chrome.runtime.sendMessage(
+        { action: "sendEmail", to, subject: "My WordKeeper List", body }
+      );
+      showToast("Sending...");
     });
   });
 });
 
-function sendViaGmail(to, subject, body) {
-  chrome.identity.getAuthToken({ interactive: true }, (token) => {
-    if (chrome.runtime.lastError || !token) {
-      showToast("Sign-in failed");
-      return;
-    }
-
-    const message = [
-      `To: ${to}`,
-      `Subject: ${subject}`,
-      "",
-      body
-    ].join("\r\n");
-
-    const encoded = btoa(unescape(encodeURIComponent(message)))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
-
-    fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ raw: encoded })
-    })
-      .then((res) => {
-        if (res.ok) {
-          showToast("Email sent!");
-        } else {
-          res.json().then((err) => {
-            console.error("Gmail API error:", err);
-            showToast("Send failed");
-          });
-        }
-      })
-      .catch(() => showToast("Send failed"));
-  });
-}
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.emailStatus) {
+    const status = changes.emailStatus.newValue;
+    if (status === "sent") showToast("Email sent!");
+    else if (status === "failed") showToast("Send failed");
+    chrome.storage.local.remove("emailStatus");
+  }
+  if (changes.words) {
+    render(changes.words.newValue || []);
+  }
+});
 
 clearBtn.addEventListener("click", () => {
   if (confirm("Delete all saved words?")) {
