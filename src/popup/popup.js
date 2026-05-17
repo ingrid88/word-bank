@@ -26,10 +26,15 @@ function render(words) {
 
   wordListEl.innerHTML = words.map((entry, i) => {
     const host = new URL(entry.url).hostname;
+    const def = entry.definition;
+    const defHtml = def
+      ? `<div class="word-def"><span class="word-pos">${escapeHtml(def.partOfSpeech)}</span> ${escapeHtml(def.definition)}</div>`
+      : "";
     return `
       <div class="word-item">
         <div>
           <div class="word-text">${escapeHtml(entry.word)}</div>
+          ${defHtml}
           <div class="word-url"><a href="${escapeHtml(entry.url)}" target="_blank">${escapeHtml(host)}</a></div>
         </div>
         <button class="delete-btn" data-index="${i}">&times;</button>
@@ -71,7 +76,14 @@ wordListEl.addEventListener("click", (e) => {
 copyBtn.addEventListener("click", () => {
   loadWords((words) => {
     if (words.length === 0) return showToast("Nothing to copy");
-    const text = words.map((w) => `${w.word} — ${w.url}`).join("\n");
+    const text = words.map((w) => {
+      let line = w.word;
+      if (w.definition) {
+        line += ` (${w.definition.partOfSpeech}: ${w.definition.definition})`;
+      }
+      line += ` — ${w.url}`;
+      return line;
+    }).join("\n");
     navigator.clipboard.writeText(text).then(() => showToast("Copied!"));
   });
 });
@@ -82,7 +94,14 @@ emailBtn.addEventListener("click", () => {
     if (!to) return showToast("Set your email first");
     loadWords((words) => {
       if (words.length === 0) return showToast("Nothing to email");
-      const body = words.map((w) => `${w.word} — ${w.url}`).join("\n");
+      const body = words.map((w) => {
+        let line = w.word;
+        if (w.definition) {
+          line += ` (${w.definition.partOfSpeech}: ${w.definition.definition})`;
+        }
+        line += `\n  Source: ${w.url}`;
+        return line;
+      }).join("\n\n");
       chrome.runtime.sendMessage(
         { action: "sendEmail", to, subject: "My WordKeeper List", body }
       );

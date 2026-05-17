@@ -62,14 +62,32 @@ async function sendViaGmail(to, subject, body) {
   }
 }
 
-function saveWord(word, url) {
+async function saveWord(word, url) {
   if (!word || /\s/.test(word)) return;
 
-  chrome.storage.sync.get({ words: [] }, (data) => {
-    const exists = data.words.some((entry) => entry.word === word && entry.url === url);
-    if (!exists) {
-      data.words.push({ word, url, timestamp: Date.now() });
-      chrome.storage.sync.set({ words: data.words });
-    }
-  });
+  const data = await chrome.storage.sync.get({ words: [] });
+  const exists = data.words.some((entry) => entry.word === word && entry.url === url);
+  if (exists) return;
+
+  const definition = await fetchDefinition(word);
+  data.words.push({ word, url, definition, timestamp: Date.now() });
+  chrome.storage.sync.set({ words: data.words });
+}
+
+async function fetchDefinition(word) {
+  try {
+    const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+    if (!res.ok) return null;
+    const json = await res.json();
+    const meanings = json[0]?.meanings || [];
+    if (meanings.length === 0) return null;
+    const first = meanings[0];
+    return {
+      partOfSpeech: first.partOfSpeech,
+      definition: first.definitions[0]?.definition || null,
+      example: first.definitions[0]?.example || null
+    };
+  } catch {
+    return null;
+  }
 }
